@@ -49,7 +49,7 @@ async def read_root(request: Request):
     })
 
 
-@app.post("/")
+@app.post("/", status_code=200)
 async def create_vote(team: Annotated[str, Form()]):
     if team not in ["TABS", "SPACES"]:
         raise HTTPException(status_code=400, detail="Invalid vote")
@@ -59,10 +59,15 @@ async def create_vote(team: Annotated[str, Form()]):
     # ====================================
 
     # create a new vote document in firestore
-    votes_collection.add({
-    "team": team,
-    "time_cast": datetime.datetime.now(datetime.timezone.utc).isoformat()
-    })
+    try:
+        votes_collection.add({
+        "team": team,
+        "time_cast": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e)
+
 
     # ====================================
     # ++++ STOP CODE ++++

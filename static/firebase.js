@@ -126,7 +126,7 @@ async function vote(team) {
         body: new URLSearchParams({"team": team})
       })
 
-      if(reponse.ok){
+      if(response.ok){
         console.log("Success");
         window.alert(`Vote for ${team} was counted`);
         window.location.reload();
