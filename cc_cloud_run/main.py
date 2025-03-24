@@ -27,15 +27,29 @@ async def read_root(request: Request):
     # ====================================
     # ++++ STOP CODE ++++
     # ====================================
+    # get all votes from firestore collection
+    votes = votes_collection.stream()
+    # @note: we are storing the votes in `vote_data` list because the firestore stream closes after certain period of time
+    vote_data = []
+    for v in votes:
+        vote_data.append(v.to_dict())
+    t = 0
+    s = 0
+    for v in vote_data:
+        if v['team'] == "TABS":
+            t += 1
+        if v['team'] == "SPACES":
+            s += 1
+
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "tabs_count": 0,
-        "spaces_count": 0,
-        "recent_votes": []
+        "tabs_count": t,
+        "spaces_count": s,
+        "recent_votes": vote_data
     })
 
 
-@app.post("/")
+@app.post("/", status_code=200)
 async def create_vote(team: Annotated[str, Form()]):
     if team not in ["TABS", "SPACES"]:
         raise HTTPException(status_code=400, detail="Invalid vote")
@@ -45,7 +59,15 @@ async def create_vote(team: Annotated[str, Form()]):
     # ====================================
 
     # create a new vote document in firestore
-    return {"detail": "Not implemented yet!"}
+    try:
+        votes_collection.add({
+        "team": team,
+        "time_cast": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e)
+
 
     # ====================================
     # ++++ STOP CODE ++++
