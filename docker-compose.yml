@@ -13,7 +13,7 @@ services:
       - PORT=8000
       - GCLOUD_PROJECT=vote
     ports:
-      - "9080:8000"
+      - "8000:8000"
     volumes:
       - ./cc_cloud_run:/app/cc_cloud_run:Z
       - ./static:/app/static:Z
